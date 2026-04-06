@@ -9,6 +9,8 @@ import com.avocadogroup.zenith.users.UserMapper;
 import com.avocadogroup.zenith.users.UserRepository;
 import com.avocadogroup.zenith.users.UserRole;
 import com.avocadogroup.zenith.users.dtos.UserDto;
+import com.avocadogroup.zenith.verificationTokens.VerificationToken;
+import com.avocadogroup.zenith.verificationTokens.VerificationTokenRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +29,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final VerificationTokenRepository verificationTokenRepository;
 
     /**
      * Extracts the authenticated User ID from the global Security Context.
@@ -96,7 +99,16 @@ public class AuthenticationService {
         // Generate an access token (JWT) for the authenticated user
         var accessToken = jwtService.generateAccessToken(user);
 
-        // TODO: save the access token in the database
+        // Create new verification token record
+        var verificationToken = new VerificationToken();
+
+        // Set the verification token data
+        verificationToken.setUser(user);
+        verificationToken.setToken(accessToken);
+        verificationToken.setExpiresAt(jwtService.getTokenExpiryDate(accessToken));
+
+        // Save the access token in the database
+        verificationTokenRepository.save(verificationToken);
 
         // Wrap and return the token in a AuthenticationTokensResponse object {accessToken:"abc", refreshToken:"xyz"}
         return new AuthenticationTokensResponse(accessToken);

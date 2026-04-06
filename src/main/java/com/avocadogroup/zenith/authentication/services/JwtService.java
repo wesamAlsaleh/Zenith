@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Service
@@ -139,7 +140,7 @@ public class JwtService {
      * Extracts the user role from the custom 'email' claim.
      *
      * @param token the JWT string.
-     * @return the user's email address.
+     * @return the user's role.
      */
     public String getUserRoleFromToken(String token) {
         // Parse the token and extract the claims
@@ -147,5 +148,19 @@ public class JwtService {
 
         // Return the user role from the token claims
         return claims.get("role").toString();
+    }
+
+    /**
+     * Extracts the token expiry date
+     *
+     * @param token the JWT string.
+     * @return the token expiry date.
+     */
+    public Instant getTokenExpiryDate(String token) {
+        // Parse the token and extract the claims
+        final Claims claims = getClaimsFromToken(token);
+
+        // Return the user role from the token claims
+        return claims.getExpiration().toInstant();
     }
 }
