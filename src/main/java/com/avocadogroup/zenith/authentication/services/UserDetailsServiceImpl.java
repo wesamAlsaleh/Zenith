@@ -14,12 +14,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     /**
      *
-     * @param username
+     * @param email
      * @return
      * @throws UsernameNotFoundException
      */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // Get the user by email or throw exception if not found
+
         return null;
     }
 }
