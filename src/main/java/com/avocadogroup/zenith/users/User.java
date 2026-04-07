@@ -19,42 +19,40 @@ import java.time.Instant;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Long id;
 
     @Size(max = 255)
-    @Column(name = "email", nullable = false)
+    @Column(name = "email")
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
-    @Column(name = "is_enabled", nullable = false)
+    @Column(name = "is_enabled")
     private Boolean isEnabled = true; // true by default
 
     @Size(max = 20)
     @NotNull
-    @Column(name = "role", nullable = false, length = 20)
+    @Column(name = "role")
     private String role;
 
     @Size(max = 2048)
-    @Column(name = "avatar_url", length = 2048)
+    @Column(name = "avatar_url")
     private String avatarUrl; // nullable
 
     @Size(max = 8)
     @NotNull
-    @Column(name = "phone_number", nullable = false, length = 8)
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @NotNull
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     @CreationTimestamp
     private Instant createdAt;
 
-    @NotNull
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     @UpdateTimestamp
     private Instant updatedAt;
 }

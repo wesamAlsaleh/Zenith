@@ -43,12 +43,12 @@ public class SecurityConfig {
         http.authorizeHttpRequests(request ->
                 request
                         // Public endpoints (no authentication required)
-                        .requestMatchers(HttpMethod.GET, "/auth/").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/ping").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                         // Role Based Endpoints (Requires specific role)
-                        .requestMatchers("/admin/**").hasRole(UserRole.ADMIN.name()) // Only users with ADMIN role can access /admin/**
+                        .requestMatchers("/api/admin/**").hasRole(UserRole.ADMIN.name()) // Only users with ADMIN role can access /admin/**
                         // All other endpoints (authentication token required) [need to pass the auth filter]
                         .anyRequest().authenticated()
         );

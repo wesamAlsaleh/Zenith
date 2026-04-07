@@ -4,6 +4,7 @@ import com.avocadogroup.zenith.authentication.UserDetailsImpl;
 import com.avocadogroup.zenith.authentication.dtos.AuthenticationTokensResponse;
 import com.avocadogroup.zenith.authentication.dtos.LoginUserRequest;
 import com.avocadogroup.zenith.authentication.dtos.RegisterUserRequest;
+import com.avocadogroup.zenith.common.exceptions.DuplicateResourceException;
 import com.avocadogroup.zenith.common.exceptions.ResourceNotFoundException;
 import com.avocadogroup.zenith.users.User;
 import com.avocadogroup.zenith.users.UserMapper;
@@ -43,9 +44,9 @@ public class AuthenticationService {
      * JWT authentication filtering) and contains the user's unique identifier.</p>
      *
      * @return the unique {@link Long} identifier of the currently authenticated user
-     * @throws RuntimeException if the authentication object is {@code null} or
-     *                          if the principal is missing, indicating an unauthorized
-     *                          or improperly processed request
+     * @throws RuntimeException      if the authentication object is {@code null} or
+     *                               if the principal is missing, indicating an unauthorized
+     *                               or improperly processed request
      * @throws NumberFormatException if the principal cannot be parsed into a {@link Long}
      */
     private Long getUserIdFromSecurityContext() {
@@ -80,11 +81,20 @@ public class AuthenticationService {
         // Initialize a new User entity
         var user = new User();
 
-        // TODO: validate that email and phone number do not already exist
+        // If the email is already used
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException("Email already in use");
+        }
+
+        // If the phone number is already used
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new DuplicateResourceException("Phone number already in use");
+        }
 
         // Set the user fields from request
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPhoneNumber(request.getPhoneNumber());
         user.setRole(UserRole.USER.toString()); // Assign default role for newly registered users
 
         // Save the user entity to the database
@@ -171,7 +181,7 @@ public class AuthenticationService {
      * which typically holds authentication details for the current request.</p>
      *
      * @return the unique identifier of the authenticated user, or {@code null}
-     *         if no authentication information is available
+     * if no authentication information is available
      */
     public Long getUserId() {
         // Extracts the user ID from the SecurityContext
