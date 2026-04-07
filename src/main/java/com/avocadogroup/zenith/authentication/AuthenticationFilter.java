@@ -67,6 +67,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // TODO: check if the token is revoked
+
         // Get the user id from the token
         var userId = jwtService.getUserIdFromToken(token);
 
