@@ -93,6 +93,7 @@ public class JwtService {
      *
      * @param token the JWT string to check.
      * @return {@code true} if the token is expired or invalid; {@code false} otherwise.
+     * @throws io.jsonwebtoken.ExpiredJwtException if the token is expired.
      */
     public boolean isTokenExpired(String token) {
         try {
@@ -113,6 +114,7 @@ public class JwtService {
      * @param token the JWT string.
      * @return the User ID as a {@link Long}.
      * @throws NumberFormatException if the subject is not a valid numeric ID.
+     * @throws io.jsonwebtoken.ExpiredJwtException if the token is expired.
      */
     public Long getUserIdFromToken(String token) {
         // Parse the token and extract the claims
@@ -127,6 +129,7 @@ public class JwtService {
      *
      * @param token the JWT string.
      * @return the user's email address.
+     * @throws io.jsonwebtoken.ExpiredJwtException if the token is expired.
      */
     public String getEmailFromToken(String token) {
         // Parse the token and extract the claims
@@ -155,6 +158,7 @@ public class JwtService {
      *
      * @param token the JWT string.
      * @return the token expiry date.
+     * @throws io.jsonwebtoken.ExpiredJwtException if the token is expired.
      */
     public Instant getTokenExpiryDate(String token) {
         // Parse the token and extract the claims

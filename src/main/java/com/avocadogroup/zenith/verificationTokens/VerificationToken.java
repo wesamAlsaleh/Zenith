@@ -46,6 +46,12 @@ public class VerificationToken {
     private Instant expiresAt;
 
     // Function to check if the token is valid
+
+    /**
+     *
+     * @param userId
+     * @return
+     */
     public boolean isValid(Long userId) {
         // If the token does not belong to the real user
         if (user == null || user.getId() == null || !user.getId().equals(userId)) {
@@ -59,5 +65,20 @@ public class VerificationToken {
 
         // Return true if the token is not revoked
         return !revoked;
+    }
+
+    /**
+     * Invalidates the current token by marking it as revoked and recording the exact timestamp.
+     * <p>
+     * This change is typically persisted to the database to prevent further
+     * authentication attempts using this specific token.
+     * </p>
+     */
+    public void revokeToken() {
+        // Marks the token as invalid for future authentication checks
+        this.revoked = true;
+
+        // Captures the precise moment of revocation for audit and security tracking
+        this.revokedAt = Instant.now();
     }
 }

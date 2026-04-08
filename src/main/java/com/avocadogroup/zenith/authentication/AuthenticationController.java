@@ -4,7 +4,7 @@ import com.avocadogroup.zenith.authentication.dtos.LoginUserRequest;
 import com.avocadogroup.zenith.authentication.dtos.LoginUserResponse;
 import com.avocadogroup.zenith.authentication.dtos.RegisterUserRequest;
 import com.avocadogroup.zenith.authentication.services.AuthenticationService;
-import com.avocadogroup.zenith.common.configs.JwtConfig;
+import com.avocadogroup.zenith.common.exceptions.BadRequestException;
 import com.avocadogroup.zenith.users.dtos.UserDto;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -114,5 +114,36 @@ public class AuthenticationController {
 
         // Return the user details with OK response
         return ResponseEntity.ok(userDto);
+    }
+
+    /**
+     * Processes user logout by extracting and invalidating the provided JWT.
+     * <p>
+     * This endpoint directly captures the <b>Authorization</b> header. If the header
+     * is valid and follows the Bearer scheme, the token is sent to the
+     * {@code AuthenticationService} for revocation. A 204 No Content status
+     * confirms the operation succeeded.
+     * </p>
+     *
+     * @param authorizationHeader The raw "Bearer [token]" string from the request headers.
+     * @return A {@link ResponseEntity} with HTTP Status 204 (No Content).
+     * @throws BadRequestException If the header is missing, empty, or not a Bearer token.
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorizationHeader) {
+        // If the authorization header is missing or does not start with "Bearer " then skip the filter
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            // System.out.println("Authorization header is null");
+            throw new BadRequestException("Invalid logout request");
+        }
+
+        // Isolates the JWT string by removing the "Bearer " prefix
+        var token = authorizationHeader.replace("Bearer ", ""); // Remove "Bearer " from "Bearer A2C4"
+
+        // Triggers the backend service to mark the token as revoked
+        var revokedToken = authenticationService.logout(token);
+
+        // Returns 204 No Content as the standard successful response for destructive actions
+        return ResponseEntity.noContent().build();
     }
 }

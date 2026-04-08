@@ -62,6 +62,15 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         // Extract the token from the header
         var token = authorizationHeader.replace("Bearer ", ""); // Remove "Bearer " from "Bearer A2C4"
 
+        // If the token not found in the db
+        if (jwtService.isTokenExpired(token)) {
+            // If so, continue the request without setting authentication (token is ignored) (continue with the next filter in the chain)
+            filterChain.doFilter(request, response);
+
+            // Stop processing in this filter and the spring security will handle the request
+            return;
+        }
+
         // Fetch the token from the database
         var dbToken = verificationTokenRepository.findByToken(token);
 
@@ -85,15 +94,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
         // Check if the token is not valid
         if (!tokenEntity.isValid(userId)) {
-            // If so, continue the request without setting authentication (token is ignored) (continue with the next filter in the chain)
-            filterChain.doFilter(request, response);
-
-            // Stop processing in this filter and the spring security will handle the request
-            return;
-        }
-
-        // If the token not found in the db
-        if (jwtService.isTokenExpired(token)) {
             // If so, continue the request without setting authentication (token is ignored) (continue with the next filter in the chain)
             filterChain.doFilter(request, response);
 

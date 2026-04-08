@@ -187,4 +187,35 @@ public class AuthenticationService {
         // Extracts the user ID from the SecurityContext
         return getUserIdFromSecurityContext();
     }
+
+    /**
+     * Processes a logout request by invalidating the provided security token.
+     * <p>
+     * This method locates the token in the persistence layer, updates its status
+     * to revoked, and records the timestamp of the action.
+     * </p>
+     *
+     * @param token The header token string to be invalidated.
+     * @return The invalidated token string upon successful revocation.
+     * @throws ResourceNotFoundException If the token does not exist in the database.
+     */
+    public String logout(String token) {
+        // Fetch the token from the db
+        var dbToken = verificationTokenRepository.findByToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid session"));
+
+        // If token is revoked do nothing
+        if (dbToken.isRevoked()) {
+            return dbToken.getToken(); // Return the revoked token to reduce db queries (save operation below)
+        }
+
+        // Updates the token's internal state to revoked and sets the revocation time
+        dbToken.revokeToken();
+
+        // Save the changes
+        verificationTokenRepository.save(dbToken);
+
+        // Returns the token identifier to confirm the operation is complete
+        return token;
+    }
 }
