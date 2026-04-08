@@ -9,6 +9,7 @@ import org.hibernate.annotations.*;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -30,15 +31,33 @@ public class VerificationToken {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "revoked")
+    private boolean revoked;
+
+    @Column(name = "revoked_at")
+    private Instant revokedAt;
+
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
     @CreationTimestamp
     private Instant createdAt;
 
-    @NotNull
     @Column(name = "expires_at", nullable = false)
-    @UpdateTimestamp
     private Instant expiresAt;
 
+    // Function to check if the token is valid
+    public boolean isValid(Long userId) {
+        // If the token does not belong to the real user
+        if (user == null || user.getId() == null || !user.getId().equals(userId)) {
+            return false;
+        }
 
+        // If the token is expired return false
+        if (expiresAt.isBefore(Instant.now())) {
+            return false;
+        }
+
+        // Return true if the token is not revoked
+        return !revoked;
+    }
 }

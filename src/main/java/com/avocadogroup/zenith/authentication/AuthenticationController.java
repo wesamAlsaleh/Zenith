@@ -31,6 +31,20 @@ public class AuthenticationController {
         return ResponseEntity.ok("Hello World");
     }
 
+    /**
+     * A secured heartbeat endpoint used to verify authentication and service availability.
+     * <p>
+     * This endpoint requires a valid security context (e.g., JWT or Session) to access.
+     * It returns a simple success message to confirm that the requester is properly
+     * authorized and the server is responsive.
+     * </p>
+     *
+     * @return A {@link ResponseEntity} containing a "Protected Hello World" success message.
+     */
+    @GetMapping("/protected-ping")
+    public ResponseEntity<String> protectedPing() {
+        return ResponseEntity.ok("Protected Hello World");
+    }
 
     /**
      * Registers a new user in the system.

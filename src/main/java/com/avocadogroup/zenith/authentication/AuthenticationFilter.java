@@ -1,6 +1,9 @@
 package com.avocadogroup.zenith.authentication;
 
 import com.avocadogroup.zenith.authentication.services.JwtService;
+import com.avocadogroup.zenith.common.exceptions.TokenNotValid;
+import com.avocadogroup.zenith.verificationTokens.VerificationToken;
+import com.avocadogroup.zenith.verificationTokens.VerificationTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +35,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
+    private final VerificationTokenRepository verificationTokenRepository;
 
     /**
      *
@@ -48,32 +52,54 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
         // If the authorization header is missing or does not start with "Bearer " then skip the filter
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            // If so, skip JWT validation and continue with the next filter in the chain
+            // If so, continue the request without setting authentication (token is ignored) (continue with the next filter in the chain)
             filterChain.doFilter(request, response);
 
-            // Exit the current filter and the spring security will handle the request
+            // Stop processing in this filter and the spring security will handle the request
             return;
         }
 
         // Extract the token from the header
         var token = authorizationHeader.replace("Bearer ", ""); // Remove "Bearer " from "Bearer A2C4"
 
-        // If the token is expired then skip the filter
-        if (jwtService.isTokenExpired(token)) {
-            // If so, skip JWT validation and continue with the next filter in the chain
-            filterChain.doFilter(request, response);
+        // Fetch the token from the database
+        var dbToken = verificationTokenRepository.findByToken(token);
 
-            // Exit the current filter and the spring security will handle the request
+        // Check if the token is not available in the DB
+        if (dbToken.isEmpty()) {
+            // If so, continue the request without setting authentication (token is ignored) (continue with the next filter in the chain)
+            filterChain.doFilter(request, response); // Pass the control to the next filter method
+
+            // Stop processing in this filter and the spring security will handle the request
             return;
         }
 
-        // TODO: check if the token is revoked
+        // Extract entity from optional
+        var tokenEntity = dbToken.get();
 
         // Get the user id from the token
         var userId = jwtService.getUserIdFromToken(token);
 
         // Get the user role from the token claims
         var userRole = jwtService.getUserRoleFromToken(token);
+
+        // Check if the token is not valid
+        if (!tokenEntity.isValid(userId)) {
+            // If so, continue the request without setting authentication (token is ignored) (continue with the next filter in the chain)
+            filterChain.doFilter(request, response);
+
+            // Stop processing in this filter and the spring security will handle the request
+            return;
+        }
+
+        // If the token not found in the db
+        if (jwtService.isTokenExpired(token)) {
+            // If so, continue the request without setting authentication (token is ignored) (continue with the next filter in the chain)
+            filterChain.doFilter(request, response);
+
+            // Stop processing in this filter and the spring security will handle the request
+            return;
+        }
 
         // Give an authorization to the user who made the request
         // Build an authentication token object with the user id (the token object is used by Spring Security to represent the authenticated user)
