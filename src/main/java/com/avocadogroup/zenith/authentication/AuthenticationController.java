@@ -97,4 +97,22 @@ public class AuthenticationController {
         // Return HTTP 200 OK with access token in response body
         return ResponseEntity.ok().body(new LoginUserResponse(authenticationTokens.getToken()));
     }
+
+    /**
+     * Retrieves the profile information of the currently authenticated user.
+     * <p>
+     * This endpoint extracts the user context from the security session or token
+     * and returns a DTO containing the user's account details.
+     * </p>
+     *
+     * @return A {@link ResponseEntity} containing the {@code UserDto} of the requester.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> me() {
+        // Retrieves the current user profile from the security context
+        var userDto = authenticationService.me();
+
+        // Return the user details with OK response
+        return ResponseEntity.ok(userDto);
+    }
 }
