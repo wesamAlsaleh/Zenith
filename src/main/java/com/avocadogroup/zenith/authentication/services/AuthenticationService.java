@@ -7,6 +7,8 @@ import com.avocadogroup.zenith.authentication.dtos.LoginUserRequest;
 import com.avocadogroup.zenith.authentication.dtos.RegisterUserRequest;
 import com.avocadogroup.zenith.common.exceptions.DuplicateResourceException;
 import com.avocadogroup.zenith.common.exceptions.ResourceNotFoundException;
+import com.avocadogroup.zenith.emailVerification.EmailVerificationService;
+import com.avocadogroup.zenith.emailVerification.dtos.SendEmailVerificationTokenRequest;
 import com.avocadogroup.zenith.users.User;
 import com.avocadogroup.zenith.users.UserMapper;
 import com.avocadogroup.zenith.users.UserRepository;
@@ -34,6 +36,7 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserSessionsRepository userSessionsRepository;
+    private final EmailVerificationService emailVerificationService;
 
     /**
      * Extracts the authenticated user's ID from the Security Context.
@@ -102,7 +105,8 @@ public class AuthenticationService {
         // Save the user entity to the database
         userRepository.save(user);
 
-        // TODO: trigger email verification workflow after registration
+        // Trigger email verification workflow after registration
+        emailVerificationService.sendVerificationEmail(new SendEmailVerificationTokenRequest(user));
 
         // Return the created entity as a DTO
         return userMapper.toDto(user);

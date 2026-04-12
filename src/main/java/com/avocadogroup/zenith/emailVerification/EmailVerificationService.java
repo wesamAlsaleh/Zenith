@@ -7,12 +7,16 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Base64;
 
 @Service
 @AllArgsConstructor
 public class EmailVerificationService {
     private final EmailService emailService;
+    private final EmailVerificationRepository emailVerificationRepository;
 
     /**
      * Generates a cryptographically secure, URL-safe string to be used
@@ -33,13 +37,24 @@ public class EmailVerificationService {
     // Function to send verification email
     public void sendVerificationEmail(SendEmailVerificationTokenRequest request) {
         // Generate verification token
-        var token = generateEmailVerificationToken();
+        var verificationToken = generateEmailVerificationToken();
 
-        // Send an email to the user
-        emailService.sendEmail(new SimpleEmailRequest(request.getToEmail(), "Test", "Test description"));
+        // Prepare the body
+        var body = "Your verification token is: " + verificationToken + "\n\nThis token expires in 15 minutes.";
+
+        // Prepare the expiration time
+        var expiresAt = Instant.now().plusSeconds(900);
+
+        // Create the token entity
+        var token = new EmailVerificationToken();
+        token.setUser(request.getUser());
+        token.setToken(verificationToken);
+        token.setExpiredAt(expiresAt);
+
+        // Email the user
+        emailService.sendEmail(new SimpleEmailRequest(request.getUser().getEmail(), "Email Verification", body));
 
         // Save the token in the db
-
-
+        emailVerificationRepository.save(token);
     }
 }

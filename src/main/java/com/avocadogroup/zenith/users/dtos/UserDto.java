@@ -16,6 +16,5 @@ public class UserDto {
     private String phoneNumber;
     private Instant createdAt;
     private Instant updatedAt;
-
-
+    private boolean verified;
 }

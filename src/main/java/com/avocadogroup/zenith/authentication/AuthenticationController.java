@@ -20,7 +20,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private AuthenticationService authenticationService;
-    private EmailVerificationService emailVerificationService;
 
     /**
      * Health check or test endpoint.
@@ -32,8 +31,6 @@ public class AuthenticationController {
      */
     @GetMapping("/ping")
     public ResponseEntity<String> hello() {
-
-        emailVerificationService.sendVerificationEmail(new SendEmailVerificationTokenRequest("wesammuneer@gmail.com"));
         return ResponseEntity.ok("Hello World");
     }
 
