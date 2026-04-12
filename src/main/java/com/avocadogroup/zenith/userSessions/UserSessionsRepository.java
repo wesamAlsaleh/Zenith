@@ -1,18 +1,18 @@
-package com.avocadogroup.zenith.verificationTokens;
+package com.avocadogroup.zenith.userSessions;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
+public interface UserSessionsRepository extends JpaRepository<UserSessions, Long> {
     /**
      * Retrieves a verification token by its token value.
      *
      * @param token the token value used to identify the verification record
-     * @return an {@link Optional} containing the matching {@link VerificationToken},
+     * @return an {@link Optional} containing the matching {@link UserSessions},
      * or {@link Optional#empty()} if no token is found
      */
-    Optional<VerificationToken> findByToken(String token);
+    Optional<UserSessions> findByToken(String token);
 
     /**
      * Retrieves the most recent verification token associated with a specific user.
@@ -22,7 +22,7 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
      * </p>
      *
      * @param userId The unique identifier of the user.
-     * @return An {@link Optional} containing the {@link VerificationToken} if found, otherwise empty.
+     * @return An {@link Optional} containing the {@link UserSessions} if found, otherwise empty.
      */
-    Optional<VerificationToken> findByUserId(Long userId);
+    Optional<UserSessions> findByUserId(Long userId);
 }

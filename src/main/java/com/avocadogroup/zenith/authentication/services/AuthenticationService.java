@@ -12,8 +12,8 @@ import com.avocadogroup.zenith.users.UserMapper;
 import com.avocadogroup.zenith.users.UserRepository;
 import com.avocadogroup.zenith.users.UserRole;
 import com.avocadogroup.zenith.users.dtos.UserDto;
-import com.avocadogroup.zenith.verificationTokens.VerificationToken;
-import com.avocadogroup.zenith.verificationTokens.VerificationTokenRepository;
+import com.avocadogroup.zenith.userSessions.UserSessions;
+import com.avocadogroup.zenith.userSessions.UserSessionsRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,7 +33,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final VerificationTokenRepository verificationTokenRepository;
+    private final UserSessionsRepository userSessionsRepository;
 
     /**
      * Extracts the authenticated user's ID from the Security Context.
@@ -115,7 +115,7 @@ public class AuthenticationService {
      * If authentication succeeds, the authenticated principal is extracted,
      * and a JWT access token is generated for the user.</p>
      *
-     * <p>The generated token is persisted in a {@link VerificationToken} entity
+     * <p>The generated token is persisted in a {@link UserSessions} entity
      * along with its expiration date for tracking or revocation purposes.</p>
      *
      * @param request the login request containing user credentials (email and password)
@@ -141,7 +141,7 @@ public class AuthenticationService {
         var accessToken = jwtService.generateAccessToken(user);
 
         // Create new verification token record
-        var verificationToken = new VerificationToken();
+        var verificationToken = new UserSessions();
 
         // Set the token metadata
         verificationToken.setUser(user);
@@ -149,7 +149,7 @@ public class AuthenticationService {
         verificationToken.setExpiresAt(jwtService.getTokenExpiryDate(accessToken));
 
         // Save the token in database for session tracking
-        verificationTokenRepository.save(verificationToken);
+        userSessionsRepository.save(verificationToken);
 
         // Return authentication response containing the access token {accessToken:"abc", refreshToken:"xyz"}
         return new AuthenticationTokensResponse(accessToken);
@@ -203,7 +203,7 @@ public class AuthenticationService {
      */
     public String logout(String token) {
         // Fetch the token from the db
-        var dbToken = verificationTokenRepository.findByToken(token)
+        var dbToken = userSessionsRepository.findByToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid session"));
 
         // If token is revoked do nothing
@@ -215,7 +215,7 @@ public class AuthenticationService {
         dbToken.revokeToken();
 
         // Save the changes
-        verificationTokenRepository.save(dbToken);
+        userSessionsRepository.save(dbToken);
 
         // Returns the token identifier to confirm the operation is complete
         return token;

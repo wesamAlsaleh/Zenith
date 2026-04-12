@@ -1,9 +1,7 @@
 package com.avocadogroup.zenith.authentication;
 
 import com.avocadogroup.zenith.authentication.services.JwtService;
-import com.avocadogroup.zenith.common.exceptions.TokenNotValid;
-import com.avocadogroup.zenith.verificationTokens.VerificationToken;
-import com.avocadogroup.zenith.verificationTokens.VerificationTokenRepository;
+import com.avocadogroup.zenith.userSessions.UserSessionsRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 // NOTE: A filter that is executed once per request. It will run before any controller is called.
@@ -35,7 +32,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final VerificationTokenRepository verificationTokenRepository;
+    private final UserSessionsRepository userSessionsRepository;
 
     /**
      *
@@ -72,7 +69,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         }
 
         // Fetch the token from the database
-        var dbToken = verificationTokenRepository.findByToken(token);
+        var dbToken = userSessionsRepository.findByToken(token);
 
         // Check if the token is not available in the DB
         if (dbToken.isEmpty()) {

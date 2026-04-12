@@ -1,4 +1,4 @@
-package com.avocadogroup.zenith.verificationTokens;
+package com.avocadogroup.zenith.userSessions;
 
 import com.avocadogroup.zenith.users.User;
 import jakarta.persistence.*;
@@ -8,14 +8,12 @@ import lombok.Setter;
 import org.hibernate.annotations.*;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.Objects;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "verification_tokens")
-public class VerificationToken {
+@Table(name = "user_sessions")
+public class UserSessions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
