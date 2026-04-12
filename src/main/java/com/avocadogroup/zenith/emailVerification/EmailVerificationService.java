@@ -32,7 +32,14 @@ public class EmailVerificationService {
 
     // Function to send verification email
     public void sendVerificationEmail(SendEmailVerificationTokenRequest request) {
+        // Generate verification token
+        var token = generateEmailVerificationToken();
+
         // Send an email to the user
         emailService.sendEmail(new SimpleEmailRequest(request.getToEmail(), "Test", "Test description"));
+
+        // Save the token in the db
+
+
     }
 }
