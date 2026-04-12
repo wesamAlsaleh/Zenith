@@ -6,6 +6,8 @@ import com.avocadogroup.zenith.authentication.dtos.LoginUserResponse;
 import com.avocadogroup.zenith.authentication.dtos.RegisterUserRequest;
 import com.avocadogroup.zenith.authentication.services.AuthenticationService;
 import com.avocadogroup.zenith.common.exceptions.BadRequestException;
+import com.avocadogroup.zenith.emailVerification.EmailVerificationService;
+import com.avocadogroup.zenith.emailVerification.dtos.SendEmailVerificationTokenRequest;
 import com.avocadogroup.zenith.users.dtos.UserDto;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private AuthenticationService authenticationService;
+    private EmailVerificationService emailVerificationService;
 
     /**
      * Health check or test endpoint.
@@ -29,6 +32,8 @@ public class AuthenticationController {
      */
     @GetMapping("/ping")
     public ResponseEntity<String> hello() {
+
+        emailVerificationService.sendVerificationEmail(new SendEmailVerificationTokenRequest("wesammuneer@gmail.com"));
         return ResponseEntity.ok("Hello World");
     }
 

@@ -138,11 +138,10 @@
             <version>0.12.6</version>
         </dependency>
 
-        <!-- #13 manual installation as dep "spring-boot-starter-mail"-->
+        <!-- #13 as dep "spring-boot-mail"-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-            <version>3.1.5</version>
+            <artifactId>spring-boot-mail</artifactId>
         </dependency>
 
     </dependencies>
