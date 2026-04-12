@@ -1,5 +1,6 @@
 package com.avocadogroup.zenith.authentication;
 
+import com.avocadogroup.zenith.authentication.dtos.ChangePasswordRequest;
 import com.avocadogroup.zenith.authentication.dtos.LoginUserRequest;
 import com.avocadogroup.zenith.authentication.dtos.LoginUserResponse;
 import com.avocadogroup.zenith.authentication.dtos.RegisterUserRequest;
@@ -146,4 +147,28 @@ public class AuthenticationController {
         // Returns 204 No Content as the standard successful response for destructive actions
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Endpoint for authenticated users to update their login credentials.
+     * <p>
+     * The request body is validated against the constraints defined in
+     * {@link ChangePasswordRequest}. If valid, the request is passed to the
+     * authentication service to verify the old password and persist the new one.
+     * </p>
+     *
+     * @param request The validated password change data.
+     * @return A {@link ResponseEntity} containing the updated {@link UserDto}.
+     */
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        // Delegates the password verification and encryption logic to the service layer
+        var updatedUserDto = authenticationService.changePassword(request);
+
+        // Returns the updated user profile with a 200 OK status
+        return ResponseEntity.ok().body(updatedUserDto);
+    }
+
+    // TODO: Forget password
+
+
 }

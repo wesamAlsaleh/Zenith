@@ -2,6 +2,7 @@ package com.avocadogroup.zenith.authentication.services;
 
 import com.avocadogroup.zenith.authentication.UserDetailsImpl;
 import com.avocadogroup.zenith.authentication.dtos.AuthenticationTokensResponse;
+import com.avocadogroup.zenith.authentication.dtos.ChangePasswordRequest;
 import com.avocadogroup.zenith.authentication.dtos.LoginUserRequest;
 import com.avocadogroup.zenith.authentication.dtos.RegisterUserRequest;
 import com.avocadogroup.zenith.common.exceptions.DuplicateResourceException;
@@ -15,6 +16,7 @@ import com.avocadogroup.zenith.verificationTokens.VerificationToken;
 import com.avocadogroup.zenith.verificationTokens.VerificationTokenRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -217,5 +219,40 @@ public class AuthenticationService {
 
         // Returns the token identifier to confirm the operation is complete
         return token;
+    }
+
+    /**
+     * Updates the password for the currently authenticated user.
+     * <p>
+     * This method verifies the user's identity by matching the provided current password
+     * against the stored hash. If successful, the new password is encrypted and
+     * persisted to the database.
+     * </p>
+     *
+     * @param request A {@link ChangePasswordRequest} containing the current and new passwords.
+     * @return A {@link UserDto} reflecting the updated user state.
+     * @throws org.springframework.security.authentication.BadCredentialsException If the current password provided is incorrect.
+     */
+    public UserDto changePassword(ChangePasswordRequest request) {
+        // Get the user who made the request
+        var userId = getUserIdFromSecurityContext();
+
+        // Get the user entity
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found")); // This should never throw since the user is authenticated
+
+        // Validates the current password before permitting the change
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new BadCredentialsException("The current password you entered is incorrect.");
+        }
+
+        // Encrypts the new password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // Updates the persistence layer
+        userRepository.save(user);
+
+        // Return the user as UserDto format
+        return userMapper.toDto(user);
     }
 }
