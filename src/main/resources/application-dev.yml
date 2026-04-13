@@ -22,3 +22,5 @@ spring:
     secret-key: ${JWT_SECRET}
     access-token-validity-seconds: 604800 # 604800 is 7 days in seconds
     refresh-token-validity-seconds: 604800 # 604800 is 7 days in seconds
+app:
+  base-url: "http://localhost:8080"

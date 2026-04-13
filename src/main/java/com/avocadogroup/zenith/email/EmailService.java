@@ -31,16 +31,12 @@ public class EmailService {
         message.setSubject(request.getSubject());
         message.setText(request.getBody());
 
-        System.out.println("Sending email...");
-
         // Try block to check for exceptions
         try {
-            log.info("Sending email..." + message);
-
             // Send the email
             javaMailSender.send(message);
 
-            System.out.println("Email sent successfully to " + request.getTo());
+//            System.out.println("Email sent successfully to " + request.getTo());
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);

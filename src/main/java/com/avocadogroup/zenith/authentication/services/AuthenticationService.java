@@ -112,6 +112,12 @@ public class AuthenticationService {
         return userMapper.toDto(user);
     }
 
+    // Function to verify the user
+    public void verifyUser(String verificationToken) {
+        // Make the token as user
+        emailVerificationService.verifyToken(verificationToken);
+    }
+
     /**
      * Authenticates a user and generates an access token.
      *

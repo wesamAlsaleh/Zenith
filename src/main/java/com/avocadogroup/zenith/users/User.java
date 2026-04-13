@@ -55,4 +55,7 @@ public class User {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private Instant updatedAt;
+
+    @Column(name = "verified")
+    private Boolean verified = false;
 }

@@ -1,15 +1,18 @@
 package com.avocadogroup.zenith.emailVerification;
 
+import com.avocadogroup.zenith.common.configs.AppConfig;
+import com.avocadogroup.zenith.common.exceptions.BadRequestException;
+import com.avocadogroup.zenith.common.exceptions.ResourceNotFoundException;
 import com.avocadogroup.zenith.email.EmailService;
 import com.avocadogroup.zenith.email.dtos.SimpleEmailRequest;
 import com.avocadogroup.zenith.emailVerification.dtos.SendEmailVerificationTokenRequest;
+import com.avocadogroup.zenith.users.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Base64;
 
 @Service
@@ -17,6 +20,8 @@ import java.util.Base64;
 public class EmailVerificationService {
     private final EmailService emailService;
     private final EmailVerificationRepository emailVerificationRepository;
+    private final UserRepository userRepository;
+    private final AppConfig appConfig; // Injected url as a bean
 
     /**
      * Generates a cryptographically secure, URL-safe string to be used
@@ -40,7 +45,11 @@ public class EmailVerificationService {
         var verificationToken = generateEmailVerificationToken();
 
         // Prepare the body
-        var body = "Your verification token is: " + verificationToken + "\n\nThis token expires in 15 minutes.";
+        var verificationLink = appConfig.getBaseUrl() + "/api/auth/verify?token=" + verificationToken;
+
+        var body = "Click the link below to verify your account:\n\n"
+                + verificationLink
+                + "\n\nThis link expires in 15 minutes.";
 
         // Prepare the expiration time
         var expiresAt = Instant.now().plusSeconds(900);
@@ -51,10 +60,40 @@ public class EmailVerificationService {
         token.setToken(verificationToken);
         token.setExpiredAt(expiresAt);
 
+        // Save the token in the db
+        emailVerificationRepository.save(token);
+
         // Email the user
         emailService.sendEmail(new SimpleEmailRequest(request.getUser().getEmail(), "Email Verification", body));
+    }
 
-        // Save the token in the db
+    // Function to verify a token
+    public void verifyToken(String verificationToken) {
+        // Fetch the token from the db
+        var token = emailVerificationRepository.findByToken(verificationToken)
+                .orElseThrow(() -> new ResourceNotFoundException("Token not found"));
+
+        // Check if the token is used
+        if (token.getUsed()) {
+            throw new BadRequestException("Token is already used");
+        }
+
+        // Check if the token is not valid (expired)
+        if (!token.isValid()) {
+            throw new BadRequestException("Token is invalid");
+        }
+
+        // Make the token as used
+        token.setUsed(true);
+
+        // Verify the user
+        var user = token.getUser();
+        user.setVerified(true);
+
+        // Save the changes of the user
+        userRepository.save(user);
+
+        // Update the changes of the token
         emailVerificationRepository.save(token);
     }
 }

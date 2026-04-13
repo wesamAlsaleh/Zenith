@@ -7,7 +7,6 @@ import com.avocadogroup.zenith.authentication.dtos.RegisterUserRequest;
 import com.avocadogroup.zenith.authentication.services.AuthenticationService;
 import com.avocadogroup.zenith.common.exceptions.BadRequestException;
 import com.avocadogroup.zenith.emailVerification.EmailVerificationService;
-import com.avocadogroup.zenith.emailVerification.dtos.SendEmailVerificationTokenRequest;
 import com.avocadogroup.zenith.users.dtos.UserDto;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -19,7 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @AllArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthenticationController {
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
     /**
      * Health check or test endpoint.
@@ -76,6 +75,16 @@ public class AuthenticationController {
 
         // Return HTTP 201 Created with Location header and created user payload
         return ResponseEntity.created(uri).body(userDto);
+    }
+
+    // Function to verify the user
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyUser(@RequestParam String token) {
+        // Verify the user with its verification token
+        authenticationService.verifyUser(token);
+
+        // Return HTTP 204
+        return ResponseEntity.noContent().build();
     }
 
     /**
