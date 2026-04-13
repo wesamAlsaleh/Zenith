@@ -7,6 +7,7 @@ import com.avocadogroup.zenith.authentication.dtos.LoginUserRequest;
 import com.avocadogroup.zenith.authentication.dtos.RegisterUserRequest;
 import com.avocadogroup.zenith.common.exceptions.DuplicateResourceException;
 import com.avocadogroup.zenith.common.exceptions.ResourceNotFoundException;
+import com.avocadogroup.zenith.common.exceptions.UnauthorizedException;
 import com.avocadogroup.zenith.emailVerification.EmailVerificationService;
 import com.avocadogroup.zenith.emailVerification.dtos.SendEmailVerificationTokenRequest;
 import com.avocadogroup.zenith.users.User;
@@ -60,8 +61,7 @@ public class AuthenticationService {
 
         // Ensure the authentication object exists before attempting to access the principal
         if (authenticationObject == null) {
-            // TODO: Replace with a custom exception (e.g., UnauthorizedException)
-            throw new RuntimeException("Authentication object is null");
+            throw new UnauthorizedException("Authentication object is null");
         }
 
         // Extract and convert the principal (expected to be the user ID) into a Long

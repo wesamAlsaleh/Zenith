@@ -142,4 +142,17 @@ public class GlobalExceptionHandler {
         // Return a generic message to the user for security purposes
         return ResponseEntity.badRequest().body(new ErrorDto(exception.getMessage()));
     }
+
+    /**
+     * Handles {@link UnauthorizedException} globally across the application.
+     * Returns a 401 Unauthorized response with a sanitized error message to prevent
+     * sensitive information leakage.
+     * * @param exception The exception thrown when authentication fails or is missing.
+     * @return A {@link ResponseEntity} containing an {@link ErrorDto} and the 401 status code.
+     */
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorDto> handleUnauthorizedException(UnauthorizedException exception) {
+        // Return a generic message to the user for security purposes
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDto(exception.getMessage()));
+    }
 }

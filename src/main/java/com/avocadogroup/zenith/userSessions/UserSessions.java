@@ -20,7 +20,7 @@ public class UserSessions {
     private Long id;
 
     @NotNull
-    @Column(name = "token", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "token", nullable = false, length = 2048)
     private String token;
 
     @NotNull
