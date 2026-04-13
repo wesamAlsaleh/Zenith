@@ -50,7 +50,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // Account must be both enabled and verified via email
-        return Boolean.TRUE.equals(user.getIsEnabled()) && Boolean.TRUE.equals(user.getVerified());
+        return user.getIsEnabled();
     }
 }

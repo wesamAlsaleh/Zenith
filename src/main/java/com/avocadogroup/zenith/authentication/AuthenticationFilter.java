@@ -85,9 +85,10 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         // Extract entity from optional
         var tokenEntity = dbToken.get();
 
-        // Extract claims safely — if the token is malformed, skip authentication
+        // Extract claims safely if the token is malformed, skip authentication
         Long userId;
         String userRole;
+
         try {
             // Get the user id from the token
             userId = jwtService.getUserIdFromToken(token);
