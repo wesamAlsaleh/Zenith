@@ -14,6 +14,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.JwtException;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -83,11 +85,20 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         // Extract entity from optional
         var tokenEntity = dbToken.get();
 
-        // Get the user id from the token
-        var userId = jwtService.getUserIdFromToken(token);
+        // Extract claims safely — if the token is malformed, skip authentication
+        Long userId;
+        String userRole;
+        try {
+            // Get the user id from the token
+            userId = jwtService.getUserIdFromToken(token);
 
-        // Get the user role from the token claims
-        var userRole = jwtService.getUserRoleFromToken(token);
+            // Get the user role from the token claims
+            userRole = jwtService.getUserRoleFromToken(token);
+        } catch (JwtException | NumberFormatException e) {
+            // Token is structurally invalid — continue unauthenticated
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // Check if the token is not valid
         if (!tokenEntity.isValid(userId)) {

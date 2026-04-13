@@ -140,7 +140,7 @@ public class JwtService {
     }
 
     /**
-     * Extracts the user role from the custom 'email' claim.
+     * Extracts the user role from the custom 'role' claim.
      *
      * @param token the JWT string.
      * @return the user's role.

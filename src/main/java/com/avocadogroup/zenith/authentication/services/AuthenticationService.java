@@ -25,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
@@ -144,7 +145,7 @@ public class AuthenticationService {
         var userObj = (UserDetailsImpl) authentication.getPrincipal(); // Authenticated principal (custom UserDetails implementation)
 
         // Get the User entity from the authenticated principal (from the UserDetails object)
-        assert userObj != null;
+        Objects.requireNonNull(userObj, "Authenticated principal must not be null");
         var user = userObj.getUser();
 
         // Generate an access token (JWT) for the authenticated user
@@ -211,6 +212,7 @@ public class AuthenticationService {
      * @return The invalidated token string upon successful revocation.
      * @throws ResourceNotFoundException If the token does not exist in the database.
      */
+    @Transactional
     public String logout(String token) {
         // Fetch the token from the db
         var dbToken = userSessionsRepository.findByToken(token)
@@ -262,7 +264,35 @@ public class AuthenticationService {
         // Updates the persistence layer
         userRepository.save(user);
 
+        // Revoke all active sessions so stolen tokens become invalid after password change
+        revokeAllUserSessions(userId);
+
         // Return the user as UserDto format
         return userMapper.toDto(user);
+    }
+
+    /**
+     * Revokes all active sessions for a given user.
+     * <p>
+     * This is used during password change and "logout everywhere" scenarios
+     * to ensure all previously issued tokens are invalidated.
+     * </p>
+     *
+     * @param userId The unique identifier of the user whose sessions should be revoked.
+     */
+    @Transactional
+    public void revokeAllUserSessions(Long userId) {
+        // Fetch all sessions belonging to the user
+        var sessions = userSessionsRepository.findAllByUserId(userId);
+
+        // Revoke each session that has not already been revoked
+        for (var session : sessions) {
+            if (!session.isRevoked()) {
+                session.revokeToken();
+            }
+        }
+
+        // Persist all changes in a single batch
+        userSessionsRepository.saveAll(sessions);
     }
 }

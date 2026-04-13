@@ -2,6 +2,7 @@ package com.avocadogroup.zenith.userSessions;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserSessionsRepository extends JpaRepository<UserSessions, Long> {
@@ -15,14 +16,13 @@ public interface UserSessionsRepository extends JpaRepository<UserSessions, Long
     Optional<UserSessions> findByToken(String token);
 
     /**
-     * Retrieves the most recent verification token associated with a specific user.
+     * Retrieves all active session tokens associated with a specific user.
      * <p>
-     * Returns an {@link Optional} to explicitly handle cases where a token
-     * may not yet have been generated or has already been purged.
+     * Returns a list to support multiple concurrent sessions (e.g. multiple devices).
      * </p>
      *
      * @param userId The unique identifier of the user.
-     * @return An {@link Optional} containing the {@link UserSessions} if found, otherwise empty.
+     * @return A list of {@link UserSessions} for the given user (may be empty).
      */
-    Optional<UserSessions> findByUserId(Long userId);
+    List<UserSessions> findAllByUserId(Long userId);
 }
