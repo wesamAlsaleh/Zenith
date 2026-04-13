@@ -58,4 +58,10 @@ public class User {
 
     @Column(name = "verified")
     private Boolean verified = false;
+
+    // Function to verify the user
+    public void verified() {
+        this.verified = true;
+    }
+
 }

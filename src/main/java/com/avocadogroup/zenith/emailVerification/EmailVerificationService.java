@@ -7,6 +7,7 @@ import com.avocadogroup.zenith.email.EmailService;
 import com.avocadogroup.zenith.email.dtos.SimpleEmailRequest;
 import com.avocadogroup.zenith.emailVerification.dtos.SendEmailVerificationTokenRequest;
 import com.avocadogroup.zenith.users.UserRepository;
+import com.avocadogroup.zenith.users.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ import java.util.Base64;
 public class EmailVerificationService {
     private final EmailService emailService;
     private final EmailVerificationRepository emailVerificationRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final AppConfig appConfig; // Injected url as a bean
 
     /**
@@ -88,10 +89,7 @@ public class EmailVerificationService {
 
         // Verify the user
         var user = token.getUser();
-        user.setVerified(true);
-
-        // Save the changes of the user
-        userRepository.save(user);
+        userService.VerifyUser(user);
 
         // Update the changes of the token
         emailVerificationRepository.save(token);
