@@ -47,7 +47,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/verify").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                         // Role Based Endpoints (Requires specific role)
                         .requestMatchers("/api/admin/**").hasRole(UserRole.ADMIN.name()) // Only users with ADMIN role can access /admin/**
                         // All other endpoints (authentication token required) [need to pass the auth filter]
