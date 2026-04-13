@@ -9,6 +9,8 @@ import com.avocadogroup.zenith.common.exceptions.BadRequestException;
 import com.avocadogroup.zenith.emailVerification.EmailVerificationService;
 import com.avocadogroup.zenith.users.dtos.UserDto;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
