@@ -81,7 +81,7 @@ public class AuthenticationController {
 
     // Function to verify the user
     @GetMapping("/verify")
-    public ResponseEntity<?> verifyUser(@RequestParam String token) {
+    public ResponseEntity<?> verifyUser(@RequestParam @NotBlank @Size(max = 2048) String token) {
         // Verify the user with its verification token
         authenticationService.verifyUser(token);
 
