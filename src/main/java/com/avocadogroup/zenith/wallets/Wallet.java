@@ -31,6 +31,9 @@ public class Wallet {
     @Column(name = "balance", nullable = false)
     private Double balance = 0D;
 
+    @Column(name = "wallet_name", nullable = false)
+    private String walletName;
+
     @Size(max = 255)
     @Column(name = "currency", nullable = false)
     private String currency;

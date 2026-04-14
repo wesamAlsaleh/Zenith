@@ -24,8 +24,9 @@ public class WalletService {
         // Link the user to the wallet
         wallet.setUser(user);
 
-        // Set the default currency
+        // Set the default fields
         wallet.setCurrency(Currency.BHD.name()); // .name() to use the "BHD"
+        wallet.setWalletName(user.getEmail().substring(0, user.getEmail().indexOf("@"))); // Set the default name to the user email
 
         // Save the wallet record in the db
         walletRepository.save(wallet);
