@@ -29,7 +29,7 @@ public class Wallet {
     private User user;
 
     @Column(name = "balance", nullable = false)
-    private Double balance;
+    private Double balance = 0D;
 
     @Size(max = 255)
     @Column(name = "currency", nullable = false)
