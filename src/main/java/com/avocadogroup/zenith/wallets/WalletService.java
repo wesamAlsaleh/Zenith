@@ -163,7 +163,7 @@ public class WalletService {
     @Transactional // Database-level protection
     public WalletDto deposit(Long userId, Long walletId, WalletTransactionRequest request) {
         // Fetch the wallet with a pessimistic write lock to prevent concurrent modification
-        Wallet wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
+        var wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
         // Add the deposited amount to the current balance
@@ -193,8 +193,8 @@ public class WalletService {
      */
     @Transactional // Database-level protection
     public WalletDto withdraw(Long userId, Long walletId, WalletTransactionRequest request) {
-        // Fetch the wallet
-        Wallet wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
+        // Fetch the wallet with a pessimistic write lock to prevent concurrent modification
+        var wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
         // Get the balance
