@@ -160,7 +160,7 @@ public class WalletService {
      * @return DTO representation of the wallet with the updated balance.
      * @throws ResourceNotFoundException If the wallet does not exist or does not belong to the user.
      */
-    @Transactional
+    @Transactional // Database-level protection
     public WalletDto deposit(Long userId, Long walletId, WalletTransactionRequest request) {
         // Fetch the wallet with a pessimistic write lock to prevent concurrent modification
         Wallet wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
@@ -191,7 +191,7 @@ public class WalletService {
      * @throws ResourceNotFoundException If the wallet does not exist or does not belong to the user.
      * @throws BadRequestException       If the withdrawal amount exceeds the available balance.
      */
-    @Transactional
+    @Transactional // Database-level protection
     public WalletDto withdraw(Long userId, Long walletId, WalletTransactionRequest request) {
         // Fetch the wallet
         Wallet wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
@@ -211,6 +211,9 @@ public class WalletService {
 
         // Updated balance to the database
         walletRepository.save(wallet);
+
+        // Send notification of the operation (logging it instead of notification service)
+
 
         // Convert and return the updated wallet as a DTO
         return walletMapper.toDto(wallet);
