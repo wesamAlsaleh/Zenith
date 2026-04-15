@@ -17,6 +17,7 @@ import com.avocadogroup.zenith.users.UserRole;
 import com.avocadogroup.zenith.users.dtos.UserDto;
 import com.avocadogroup.zenith.userSessions.UserSessions;
 import com.avocadogroup.zenith.userSessions.UserSessionsRepository;
+import com.avocadogroup.zenith.wallets.WalletService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -39,6 +40,7 @@ public class AuthenticationService {
     private final UserMapper userMapper;
     private final UserSessionsRepository userSessionsRepository;
     private final EmailVerificationService emailVerificationService;
+    private final WalletService walletService;
 
     /**
      * Extracts the authenticated user's ID from the Security Context.
@@ -105,6 +107,9 @@ public class AuthenticationService {
 
         // Save the user entity to the database
         userRepository.save(user);
+
+        // Create a default wallet
+        walletService.createWallet(user);
 
         // Trigger email verification workflow after registration
         emailVerificationService.sendVerificationEmail(new SendEmailVerificationTokenRequest(user));
