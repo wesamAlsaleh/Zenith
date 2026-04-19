@@ -7,6 +7,8 @@ import com.avocadogroup.zenith.authentication.dtos.RegisterUserRequest;
 import com.avocadogroup.zenith.authentication.services.AuthenticationService;
 import com.avocadogroup.zenith.common.exceptions.BadRequestException;
 import com.avocadogroup.zenith.emailVerification.EmailVerificationService;
+import com.avocadogroup.zenith.passwordReset.dtos.ForgotPasswordRequest;
+import com.avocadogroup.zenith.passwordReset.dtos.ResetPasswordRequest;
 import com.avocadogroup.zenith.users.dtos.UserDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -181,7 +183,23 @@ public class AuthenticationController {
         return ResponseEntity.ok().body(updatedUserDto);
     }
 
-    // TODO: Forget password
+    // Function to request password reset email
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        // Send the password reset email
+        authenticationService.forgotPassword(request.getEmail());
 
+        // Return HTTP 200
+        return ResponseEntity.ok().body("Password reset email sent");
+    }
 
+    // Function to reset password using token
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        // Reset the password
+        authenticationService.resetPassword(request);
+
+        // Return HTTP 204
+        return ResponseEntity.noContent().build();
+    }
 }

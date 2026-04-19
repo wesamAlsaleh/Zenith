@@ -10,6 +10,8 @@ import com.avocadogroup.zenith.common.exceptions.ResourceNotFoundException;
 import com.avocadogroup.zenith.common.exceptions.UnauthorizedException;
 import com.avocadogroup.zenith.emailVerification.EmailVerificationService;
 import com.avocadogroup.zenith.emailVerification.dtos.SendEmailVerificationTokenRequest;
+import com.avocadogroup.zenith.passwordReset.PasswordResetService;
+import com.avocadogroup.zenith.passwordReset.dtos.ResetPasswordRequest;
 import com.avocadogroup.zenith.users.User;
 import com.avocadogroup.zenith.users.UserMapper;
 import com.avocadogroup.zenith.users.UserRepository;
@@ -40,6 +42,7 @@ public class AuthenticationService {
     private final UserMapper userMapper;
     private final UserSessionsRepository userSessionsRepository;
     private final EmailVerificationService emailVerificationService;
+    private final PasswordResetService passwordResetService;
     private final WalletService walletService;
 
     /**
@@ -299,5 +302,15 @@ public class AuthenticationService {
 
         // Persist all changes in a single batch
         userSessionsRepository.saveAll(sessions);
+    }
+
+    // Function to send password reset email
+    public void forgotPassword(String email) {
+        passwordResetService.sendPasswordResetEmail(email);
+    }
+
+    // Function to reset password using token
+    public void resetPassword(ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request);
     }
 }
