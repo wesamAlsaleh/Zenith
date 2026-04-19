@@ -212,9 +212,6 @@ public class WalletService {
         // Updated balance to the database
         walletRepository.save(wallet);
 
-        // Send notification of the operation (logging it instead of notification service)
-
-
         // Convert and return the updated wallet as a DTO
         return walletMapper.toDto(wallet);
     }
