@@ -23,6 +23,6 @@ spring:
     access-token-validity-seconds: 604800 # 604800 is 7 days in seconds
     refresh-token-validity-seconds: 604800 # 604800 is 7 days in seconds
   cloudinary:
-    url: ${ }
+    url: ${CLOUDINARY_URL}
 app:
   base-url: "http://localhost:8080"
