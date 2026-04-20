@@ -1,4 +1,4 @@
-package com.avocadogroup.zenith.passwordReset;
+    package com.avocadogroup.zenith.passwordReset;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

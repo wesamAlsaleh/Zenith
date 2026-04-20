@@ -18,7 +18,10 @@ public class UserService {
     private final AuthenticationService authenticationService;
     private final CloudinaryService cloudinaryService;
 
-    // function to make the user verified
+    /**
+     * Verifies the user by setting the verified flag to true
+     * @param user the user to verify
+     */
     public void VerifyUser(User user) {
         // If the user is null throw error
         if (user == null) {
@@ -32,9 +35,13 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // Function to update the authenticated user's profile (partial update)
+    /**
+     * Updates the authenticated user's profile (partial update)
+     * @param request the update profile request
+     * @return the updated user as DTO
+     */
     public UserDto updateProfile(UpdateProfileRequest request) {
-        // Get the authenticated user ID
+        // Get the authenticated user id from the context
         var userId = authenticationService.getUserId();
 
         // Fetch the user from the db
@@ -47,6 +54,8 @@ public class UserService {
             if (!request.getEmail().equalsIgnoreCase(user.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
                 throw new DuplicateResourceException("Email already in use");
             }
+
+            // Update the email
             user.setEmail(request.getEmail());
         }
 
@@ -56,12 +65,16 @@ public class UserService {
             if (!request.getPhoneNumber().equals(user.getPhoneNumber()) && userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
                 throw new DuplicateResourceException("Phone number already in use");
             }
+            
+            // Update the phone number
             user.setPhoneNumber(request.getPhoneNumber());
         }
 
         // Upload avatar if provided
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
             String avatarUrl = cloudinaryService.uploadFile(request.getAvatar(), "avatars");
+
+            // Update the avatar URL
             user.setAvatarUrl(avatarUrl);
         }
 
@@ -72,7 +85,10 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
-    // Function to delete a user (soft delete for ADMIN, hard delete for others)
+    /**
+     * Deletes a user (soft delete for ADMIN, hard delete for others)
+     * @param userId the ID of the user to delete
+     */
     public void deleteUser(Long userId) {
         // Fetch the user from the db
         var user = userRepository.findById(userId)
