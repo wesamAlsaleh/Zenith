@@ -1,6 +1,5 @@
 package com.avocadogroup.zenith.users;
 
-import com.avocadogroup.zenith.authentication.services.AuthenticationService;
 import com.avocadogroup.zenith.cloudinary.CloudinaryService;
 import com.avocadogroup.zenith.common.exceptions.BadRequestException;
 import com.avocadogroup.zenith.common.exceptions.DuplicateResourceException;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final AuthenticationService authenticationService;
     private final CloudinaryService cloudinaryService;
 
     /**
@@ -40,9 +38,7 @@ public class UserService {
      * @param request the update profile request
      * @return the updated user as DTO
      */
-    public UserDto updateProfile(UpdateProfileRequest request) {
-        // Get the authenticated user id from the context
-        var userId = authenticationService.getUserId();
+    public UserDto updateProfile(Long userId, UpdateProfileRequest request) {
 
         // Fetch the user from the db
         var user = userRepository.findById(userId)
