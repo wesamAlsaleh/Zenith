@@ -13,6 +13,7 @@ public class UserDto {
     private String email;
     private Boolean isEnabled;
     private UserRole role;
+    private String avatarUrl;
     private String phoneNumber;
     private Instant createdAt;
     private Instant updatedAt;
