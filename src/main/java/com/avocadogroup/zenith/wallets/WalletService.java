@@ -14,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @AllArgsConstructor
@@ -147,72 +150,107 @@ public class WalletService {
         return walletMapper.toDto(wallet);
     }
 
+    // Lock registry (only one lock per wallet ID)
+    private final ConcurrentHashMap<Long, ReentrantLock> walletLocks = new ConcurrentHashMap<>(); // ConcurrentHashMap is thread-safe Map 
+
+    /**
+     * Returns a lock for a specific wallet ID.
+     *
+     * @param walletId The ID of the wallet to get a lock for.
+     * @return A lock for the specified wallet ID.
+     */
+    private ReentrantLock getLockForWallet(Long walletId) {
+        return walletLocks.computeIfAbsent(walletId, id -> new ReentrantLock()); // Create a new lock if it doesn't exist
+    }
+
     /**
      * Deposits a positive amount into the specified wallet.
-     * <p>
-     * Uses pessimistic write locking to prevent race conditions during concurrent deposits.
-     * The lock is acquired at the database row level and held until the transaction commits.
-     * </p>
      *
-     * @param userId   The ID of the authenticated user (for ownership verification).
-     * @param walletId The ID of the wallet to deposit into.
-     * @param request  The transaction request containing the deposit amount.
-     * @return DTO representation of the wallet with the updated balance.
+     * @param userId   The ID of the authenticated user
+     * @param walletId The ID of the wallet to deposit into
+     * @param request  The transaction request containing the deposit amount
+     * @return DTO representation of the wallet with the updated balance
      * @throws ResourceNotFoundException If the wallet does not exist or does not belong to the user.
      */
     @Transactional // Database-level protection
     public WalletDto deposit(Long userId, Long walletId, WalletTransactionRequest request) {
-        // Fetch the wallet with a pessimistic write lock to prevent concurrent modification
-        var wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
+        // Get the lock for this wallet
+        ReentrantLock lock = getLockForWallet(walletId);
 
-        // Add the deposited amount to the current balance
-        wallet.setBalance(wallet.getBalance().add(request.getAmount()));
+        // Acquire the lock
+        lock.lock();
 
-        // Persist the updated balance to the database
-        walletRepository.save(wallet);
+        // Try to deposit
+        try {
+            // Fetch the wallet with a pessimistic write lock to prevent concurrent modification
+            var wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
-        // Convert and return the updated wallet as a DTO
-        return walletMapper.toDto(wallet);
+            // Artificial delay to simulate processing and expose race conditions
+            try { Thread.sleep(200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
+            // Add the deposited amount to the current balance
+            wallet.setBalance(wallet.getBalance().add(request.getAmount()));
+
+            // Update the balance in the database
+            walletRepository.save(wallet);
+
+            // Convert and return the updated wallet as a DTO
+            return walletMapper.toDto(wallet);
+        } finally {
+            // Release the lock
+            lock.unlock();
+        }
     }
 
     /**
      * Withdraws a positive amount from the specified wallet.
-     * <p>
-     * Enforces a strict no-overdraft policy: the withdrawal is rejected if the
-     * requested amount exceeds the available balance. Uses pessimistic write locking
-     * to guarantee the balance check and subtraction are atomic under concurrency.
-     * </p>
      *
-     * @param userId   The ID of the authenticated user (for ownership verification).
-     * @param walletId The ID of the wallet to withdraw from.
-     * @param request  The transaction request containing the withdrawal amount.
-     * @return DTO representation of the wallet with the updated balance.
+     * @param userId   The ID of the authenticated user
+     * @param walletId The ID of the wallet to withdraw from
+     * @param request  The transaction request containing the withdrawal amount
+     * @return DTO representation of the wallet with the updated balance
      * @throws ResourceNotFoundException If the wallet does not exist or does not belong to the user.
      * @throws BadRequestException       If the withdrawal amount exceeds the available balance.
      */
     @Transactional // Database-level protection
     public WalletDto withdraw(Long userId, Long walletId, WalletTransactionRequest request) {
-        // Fetch the wallet with a pessimistic write lock to prevent concurrent modification
-        var wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
+        // Get the lock for this wallet
+        ReentrantLock lock = getLockForWallet(walletId);
 
-        // Get the balance
-        var balance = wallet.getBalance();
+        // Acquire the lock
+        lock.lock();
 
-        // Check if the wallet has sufficient funds for the withdrawal (no overdraft allowed)
-        if (balance.compareTo(request.getAmount()) < 0) {
-            // Reject the withdrawal to prevent negative balance
-            throw new BadRequestException("Insufficient balance. Available: " + wallet.getBalance());
+        // Try to withdraw
+        try {
+            // Fetch the wallet
+            var wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
+
+            // Delay to simulate processing and expose race conditions
+            try { Thread.sleep(200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
+            // Get the balance
+            var balance = wallet.getBalance();
+
+            // Check if the wallet has sufficient funds for the withdrawal (no overdraft allowed)
+            if (balance.compareTo(request.getAmount()) < 0) {
+                // Reject the withdrawal to prevent negative balance
+                throw new BadRequestException("Insufficient balance. Available: " + wallet.getBalance());
+            }
+
+            // Subtract the withdrawal amount from the current balance
+            wallet.setBalance(balance.subtract(request.getAmount()));
+
+            // Update the balance in the database
+            walletRepository.save(wallet);
+
+            // Convert and return the updated wallet as a DTO
+            return walletMapper.toDto(wallet);
+        } finally {
+            // Release the lock
+            lock.unlock();
         }
 
-        // Subtract the withdrawal amount from the current balance
-        wallet.setBalance(balance.subtract(request.getAmount()));
-
-        // Updated balance to the database
-        walletRepository.save(wallet);
-
-        // Convert and return the updated wallet as a DTO
-        return walletMapper.toDto(wallet);
     }
 }
