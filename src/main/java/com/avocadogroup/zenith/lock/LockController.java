@@ -11,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -90,9 +88,8 @@ public class LockController {
                     // Get the end time of the operation
                     var endTime = System.currentTimeMillis();
 
-                    log.info("[{}] {} | Start: {}ms | End: {}ms | Duration: {}ms | Balance after: {}",
-                            threadName, request.getOperation(), startTime, endTime,
-                            (endTime - startTime), result.getBalance());
+                    log.info("[{}] {} | Duration: {}ms | Balance after: {}",
+                            threadName, request.getOperation(), (endTime - startTime), result.getBalance());
 
                     // Increment the success count
                     successCount.incrementAndGet();
