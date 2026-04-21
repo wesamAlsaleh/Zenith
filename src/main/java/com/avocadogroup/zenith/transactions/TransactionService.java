@@ -4,13 +4,10 @@ import com.avocadogroup.zenith.transactions.dtos.TransactionDto;
 import com.avocadogroup.zenith.wallets.Wallet;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -60,15 +57,16 @@ public class TransactionService {
             TransactionType type,
             Pageable pageable
     ) {
-        // Fetch the user transactions by wallet id
-        var transactions = transactionRepository.findByWalletId(walletId, pageable);
+        // Fetch transactions, filter by type if provided otherwise fetch all for the wallet
+        Page<Transaction> transactions;
 
-        // Map each transaction to DTO
-        var transactionsDto = transactions.stream()
-                .map(transactionMapper::toDto)
-                .toList();
+        if (type != null) {
+            transactions = transactionRepository.findByWalletIdAndType(walletId, type, pageable);
+        } else {
+            transactions = transactionRepository.findByWalletId(walletId, pageable);
+        }
 
-        // Return the paginated result as Page<TransactionDto>
-        return new PageImpl<>(transactionsDto, pageable, transactionsDto.size());
+        // Map entities to DTOs while preserving pagination metadata
+        return transactions.map(transactionMapper::toDto);
     }
 }

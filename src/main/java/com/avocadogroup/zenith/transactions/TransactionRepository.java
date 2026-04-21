@@ -10,6 +10,11 @@ import org.springframework.data.jpa.repository.Query;
 
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
-    @Query("SELECT t FROM Transaction t WHERE t.id = :walletId")
+    // Fetch all transactions where the wallet is either the sender or receiver
+    @Query("SELECT t FROM Transaction t WHERE t.senderWallet.id = :walletId OR t.receiverWallet.id = :walletId")
     Page<Transaction> findByWalletId(Long walletId, Pageable pageable);
+
+    // Fetch transactions by wallet id and transaction type
+    @Query("SELECT t FROM Transaction t WHERE (t.senderWallet.id = :walletId OR t.receiverWallet.id = :walletId) AND t.transactionType = :type")
+    Page<Transaction> findByWalletIdAndType(Long walletId, TransactionType type, Pageable pageable);
 }

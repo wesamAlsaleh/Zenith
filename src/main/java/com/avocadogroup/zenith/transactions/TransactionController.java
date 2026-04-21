@@ -34,13 +34,11 @@ public class TransactionController {
      */
     @GetMapping
     public ResponseEntity<Page<TransactionDto>> getTransactions(
-            @RequestParam(required = false) TransactionType type,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(name = "wallet_id") Long walletId,
+            @RequestParam(name = "type", required = false) TransactionType type,
+            @RequestParam(name = "page_number", defaultValue = "0") int page,
+            @RequestParam(name = "items_number", defaultValue = "10") int size
     ) {
-        // Get the authenticated user's ID from the security context
-        Long userId = authenticationService.getUserId();
-
         // Build pageable with default sort by createdAt descending
         Pageable pageable = PageRequest.of(
                 page,
@@ -49,7 +47,7 @@ public class TransactionController {
         );
 
         // Fetch paginated transactions
-        Page<TransactionDto> transactions = transactionService.getTransactions(userId, type, pageable);
+        Page<TransactionDto> transactions = transactionService.getTransactions(walletId, type, pageable);
 
         // Return HTTP 200 OK with the paginated transaction list
         return ResponseEntity.ok(transactions);
