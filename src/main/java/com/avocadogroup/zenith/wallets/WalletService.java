@@ -186,6 +186,9 @@ public class WalletService {
             var wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
+            // Artificial delay to simulate processing and expose race conditions
+            try { Thread.sleep(200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
             // Add the deposited amount to the current balance
             wallet.setBalance(wallet.getBalance().add(request.getAmount()));
 
@@ -223,6 +226,9 @@ public class WalletService {
             // Fetch the wallet
             var wallet = walletRepository.findByIdAndUserIdForUpdate(walletId, userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
+
+            // Delay to simulate processing and expose race conditions
+            try { Thread.sleep(200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 
             // Get the balance
             var balance = wallet.getBalance();
