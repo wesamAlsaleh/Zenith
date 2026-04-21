@@ -3,6 +3,8 @@ package com.avocadogroup.zenith.wallets;
 import com.avocadogroup.zenith.common.exceptions.BadRequestException;
 import com.avocadogroup.zenith.common.exceptions.DuplicateResourceException;
 import com.avocadogroup.zenith.common.exceptions.ResourceNotFoundException;
+import com.avocadogroup.zenith.transactions.TransactionService;
+import com.avocadogroup.zenith.transactions.TransactionType;
 import com.avocadogroup.zenith.users.User;
 import com.avocadogroup.zenith.users.UserRepository;
 import com.avocadogroup.zenith.wallets.dtos.CreateWalletRequest;
@@ -24,6 +26,7 @@ public class WalletService {
     private final WalletRepository walletRepository;
     private final WalletMapper walletMapper;
     private final UserRepository userRepository;
+    private final TransactionService transactionService;
 
     /**
      * Creates a default BHD wallet during user registration.
@@ -195,6 +198,9 @@ public class WalletService {
             // Update the balance in the database
             walletRepository.save(wallet);
 
+            // Record the deposit transaction (both sender and receiver are the same wallet)
+            transactionService.recordTransaction(wallet, wallet, request.getAmount(), TransactionType.DEPOSIT);
+
             // Convert and return the updated wallet as a DTO
             return walletMapper.toDto(wallet);
         } finally {
@@ -244,6 +250,9 @@ public class WalletService {
 
             // Update the balance in the database
             walletRepository.save(wallet);
+
+            // Record the withdrawal transaction (both sender and receiver are the same wallet)
+            transactionService.recordTransaction(wallet, wallet, request.getAmount(), TransactionType.WITHDRAW);
 
             // Convert and return the updated wallet as a DTO
             return walletMapper.toDto(wallet);

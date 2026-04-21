@@ -2,8 +2,6 @@ package com.avocadogroup.zenith.transactions;
 
 import com.avocadogroup.zenith.wallets.Wallet;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
@@ -24,25 +22,23 @@ public class Transaction {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "sender_wallet_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_wallet_id")
     private Wallet senderWallet;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "receiver_wallet_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_wallet_id")
     private Wallet receiverWallet;
 
-    @ColumnDefault("0.0")
-    @Column(name = "amount", nullable = false)
+    @Column(name = "amount", nullable = false, precision = 19, scale = 4)
     private BigDecimal amount;
 
     @Column(name = "status", nullable = false, length = 20)
     private String status;
 
+    @Enumerated(EnumType.STRING) // Use the TransactionType enum instead of raw String for type safety 
     @Column(name = "transaction_type", nullable = false, length = 30)
-    private String transactionType;
+    private TransactionType transactionType;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at", nullable = false)
